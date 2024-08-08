@@ -12,10 +12,13 @@ const api = axios.create({
 
 export const fetchCampaigns = async () => {
   try {
+    console.log('Fetching campaigns...');
     const response = await api.get('/campaigns');
+    console.log('Campaigns fetched successfully:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching campaigns:', error);
+    console.log('Error details:', error.response ? error.response.data : 'No response data');
     throw error;
   }
 };
