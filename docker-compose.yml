@@ -9,8 +9,8 @@ services:
       - MONGO_URI=mongodb://mongo:27017/
       - MONGO_DB=mydatabase
       - MONGO_COLLECTION=mycollection
-      - GOPHISH_API_URL=http://your-gophish-api-url
-      - GOPHISH_API_KEY=your-api-key
+      - GOPHISH_API_URL=http://192.168.1.100:3333
+      - GOPHISH_API_KEY=7cd9c0a8c6c7e9f1e4b3a2d1c6b5a4d3
     volumes:
       - .:/app
     depends_on:
