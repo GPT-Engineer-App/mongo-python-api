@@ -1,22 +1,23 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_GOPHISH_API_URL || 'http://localhost:5000';
-const API_KEY = import.meta.env.VITE_GOPHISH_API_KEY || 'your-api-key';
-
-const gophishApi = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Authorization': `Bearer ${API_KEY}`,
-    'Content-Type': 'application/json',
-  },
-});
+const API_URL = '/api';
 
 export const fetchCampaigns = async () => {
   try {
-    const response = await gophishApi.get('/campaigns');
+    const response = await axios.get(`${API_URL}/campaigns`);
     return response.data;
   } catch (error) {
     console.error('Error fetching campaigns:', error);
+    throw error;
+  }
+};
+
+export const fetchCampaignDetails = async (id) => {
+  try {
+    const response = await axios.get(`${API_URL}/campaigns/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching campaign details for id ${id}:`, error);
     throw error;
   }
 };
