@@ -15,6 +15,7 @@
                     <th class="py-3 px-6 text-left">Name</th>
                     <th class="py-3 px-6 text-left">Created Date</th>
                     <th class="py-3 px-6 text-left">Status</th>
+                    <th class="py-3 px-6 text-left">Actions</th>
                 </tr>
             </thead>
             <tbody class="text-gray-600 text-sm font-light">
@@ -23,6 +24,11 @@
                     <td class="py-3 px-6 text-left whitespace-nowrap">{{ campaign.name }}</td>
                     <td class="py-3 px-6 text-left">{{ campaign.created_date }}</td>
                     <td class="py-3 px-6 text-left">{{ campaign.status }}</td>
+                    <td class="py-3 px-6 text-left">
+                        <a href="{{ url_for('campaign_details', id=campaign.id) }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs">
+                            View Details
+                        </a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

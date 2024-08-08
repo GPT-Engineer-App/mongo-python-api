@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 from pymongo import MongoClient
 import os
 import requests
@@ -22,7 +22,7 @@ GOPHISH_API_KEY = os.getenv('GOPHISH_API_KEY', 'your-api-key')
 def index():
     return render_template('index.html')
 
-@app.route('/api/campaigns')
+@app.route('/campaigns')
 def campaigns():
     try:
         response = requests.get(
@@ -34,40 +34,55 @@ def campaigns():
         )
         response.raise_for_status()
         campaigns = response.json()
-        return jsonify(campaigns)
+        return render_template('campaigns.html', campaigns=campaigns)
     except requests.RequestException as e:
-        return jsonify({'error': str(e)}), 500
+        return render_template('error.html', error=str(e))
 
-@app.route('/create', methods=['POST'])
+@app.route('/campaign/<int:id>')
+def campaign_details(id):
+    try:
+        response = requests.get(
+            f"{GOPHISH_API_URL}/api/campaigns/{id}",
+            headers={
+                'Authorization': f'Bearer {GOPHISH_API_KEY}',
+                'Content-Type': 'application/json',
+            }
+        )
+        response.raise_for_status()
+        campaign = response.json()
+        return render_template('campaign_details.html', campaign=campaign)
+    except requests.RequestException as e:
+        return render_template('error.html', error=str(e))
+
+@app.route('/create', methods=['GET', 'POST'])
 def create_document():
-    data = request.json
-    result = collection.insert_one(data)
-    return jsonify({'inserted_id': str(result.inserted_id)}), 201
+    if request.method == 'POST':
+        data = request.form.to_dict()
+        result = collection.insert_one(data)
+        return redirect(url_for('index'))
+    return render_template('create_document.html')
 
-@app.route('/read/<id>', methods=['GET'])
+@app.route('/read/<id>')
 def read_document(id):
     document = collection.find_one({'_id': id})
     if document:
-        return jsonify(document), 200
+        return render_template('document_details.html', document=document)
     else:
-        return jsonify({'error': 'Document not found'}), 404
+        return render_template('error.html', error='Document not found')
 
-@app.route('/update/<id>', methods=['PUT'])
+@app.route('/update/<id>', methods=['GET', 'POST'])
 def update_document(id):
-    data = request.json
-    result = collection.update_one({'_id': id}, {'$set': data})
-    if result.matched_count:
-        return jsonify({'message': 'Document updated'}), 200
-    else:
-        return jsonify({'error': 'Document not found'}), 404
+    document = collection.find_one({'_id': id})
+    if request.method == 'POST':
+        data = request.form.to_dict()
+        result = collection.update_one({'_id': id}, {'$set': data})
+        return redirect(url_for('index'))
+    return render_template('update_document.html', document=document)
 
-@app.route('/delete/<id>', methods=['DELETE'])
+@app.route('/delete/<id>')
 def delete_document(id):
     result = collection.delete_one({'_id': id})
-    if result.deleted_count:
-        return jsonify({'message': 'Document deleted'}), 200
-    else:
-        return jsonify({'error': 'Document not found'}), 404
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
