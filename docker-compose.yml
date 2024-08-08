@@ -1,13 +1,27 @@
-version: "2"
+version: "3"
 services:
-  node:
-    image: "node:current"
-    user: "node"
-    working_dir: /home/node/app
-    environment:
-      - NODE_ENV=development
-    volumes:
-      - ./:/home/node/app
+  web:
+    build: .
     ports:
-      - "8080:8080"
-    command: "sh run.sh"
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - MONGO_URI=mongodb://mongo:27017/
+      - MONGO_DB=mydatabase
+      - MONGO_COLLECTION=mycollection
+      - GOPHISH_API_URL=http://your-gophish-api-url
+      - GOPHISH_API_KEY=your-api-key
+    volumes:
+      - .:/app
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:

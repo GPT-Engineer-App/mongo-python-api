@@ -1,6 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, jsonify
 from pymongo import MongoClient
 import os
+import requests
 
 app = Flask(__name__)
 
@@ -12,6 +13,29 @@ MONGO_COLLECTION = os.getenv('MONGO_COLLECTION', 'mycollection')
 client = MongoClient(MONGO_URI)
 db = client[MONGO_DB]
 collection = db[MONGO_COLLECTION]
+
+# GoPhish API configuration
+GOPHISH_API_URL = os.getenv('GOPHISH_API_URL', 'http://your-gophish-api-url')
+GOPHISH_API_KEY = os.getenv('GOPHISH_API_KEY', 'your-api-key')
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/campaigns')
+def campaigns():
+    try:
+        response = requests.get(
+            f"{GOPHISH_API_URL}/api/campaigns/",
+            headers={
+                'Authorization': GOPHISH_API_KEY,
+                'Content-Type': 'application/json',
+            }
+        )
+        campaigns = response.json()
+        return render_template('campaigns.html', campaigns=campaigns)
+    except requests.RequestException as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/create', methods=['POST'])
 def create_document():
