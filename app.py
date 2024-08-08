@@ -1,29 +1,20 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
-from pymongo import MongoClient
-import os
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 import requests
 from config import Config
 
 app = Flask(__name__)
+CORS(app)
 
 # Load configuration
 app.config.from_object(Config)
-
-# MongoDB setup
-client = MongoClient(app.config['MONGO_URI'])
-db = client[app.config['MONGO_DB']]
-collection = db[app.config['MONGO_COLLECTION']]
 
 # GoPhish API configuration
 GOPHISH_API_URL = app.config['GOPHISH_API_URL']
 GOPHISH_API_KEY = app.config['GOPHISH_API_KEY']
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/campaigns')
-def campaigns():
+@app.route('/api/campaigns')
+def get_campaigns():
     try:
         response = requests.get(
             f"{GOPHISH_API_URL}/campaigns/",
@@ -31,13 +22,13 @@ def campaigns():
         )
         response.raise_for_status()
         campaigns = response.json()
-        return render_template('campaigns.html', campaigns=campaigns)
+        return jsonify(campaigns)
     except requests.RequestException as e:
         app.logger.error(f"Error fetching campaigns: {str(e)}")
-        return render_template('error.html', error="Unable to fetch campaigns. Please try again later.")
+        return jsonify({"error": "Unable to fetch campaigns. Please try again later."}), 500
 
-@app.route('/campaign/<int:id>')
-def campaign_details(id):
+@app.route('/api/campaigns/<int:id>')
+def get_campaign_details(id):
     try:
         response = requests.get(
             f"{GOPHISH_API_URL}/campaigns/{id}",
@@ -45,10 +36,10 @@ def campaign_details(id):
         )
         response.raise_for_status()
         campaign = response.json()
-        return render_template('campaign_details.html', campaign=campaign)
+        return jsonify(campaign)
     except requests.RequestException as e:
         app.logger.error(f"Error fetching campaign details for id {id}: {str(e)}")
-        return render_template('error.html', error="Unable to fetch campaign details. Please try again later.")
+        return jsonify({"error": "Unable to fetch campaign details. Please try again later."}), 500
 
 @app.route('/create', methods=['GET', 'POST'])
 def create_document():
@@ -80,22 +71,20 @@ def delete_document(id):
     result = collection.delete_one({'_id': id})
     return redirect(url_for('index'))
 
-@app.route('/create_campaign', methods=['GET', 'POST'])
+@app.route('/api/campaigns', methods=['POST'])
 def create_campaign():
-    if request.method == 'POST':
-        campaign_data = request.form.to_dict()
-        try:
-            response = requests.post(
-                f"{GOPHISH_API_URL}/campaigns/",
-                headers={'Authorization': GOPHISH_API_KEY},
-                json=campaign_data
-            )
-            response.raise_for_status()
-            return redirect(url_for('campaigns'))
-        except requests.RequestException as e:
-            app.logger.error(f"Error creating campaign: {str(e)}")
-            return render_template('error.html', error="Unable to create campaign. Please try again later.")
-    return render_template('create_campaign.html')
+    campaign_data = request.json
+    try:
+        response = requests.post(
+            f"{GOPHISH_API_URL}/campaigns/",
+            headers={'Authorization': GOPHISH_API_KEY},
+            json=campaign_data
+        )
+        response.raise_for_status()
+        return jsonify(response.json()), 201
+    except requests.RequestException as e:
+        app.logger.error(f"Error creating campaign: {str(e)}")
+        return jsonify({"error": "Unable to create campaign. Please try again later."}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0', port=5000)

@@ -1,12 +1,12 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://safeurl.dk/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const API_KEY = import.meta.env.VITE_API_KEY || '2956b7480392191b9ab24b159548719c305a8ad5ccf16ceb8f1d933d489228b0';
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
-    'Authorization': API_KEY
+    'Authorization': `Bearer ${API_KEY}`
   }
 });
 
