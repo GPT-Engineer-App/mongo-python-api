@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
-import { Box, Heading, Text, Spinner, VStack, HStack } from '@chakra-ui/react';
+import { useParams, Link } from 'react-router-dom';
+import { Box, Heading, Text, Spinner, VStack, HStack, Button, Alert, AlertIcon } from '@chakra-ui/react';
 import { fetchCampaignDetails } from '../services/gophishApi';
 
 const CampaignDetails = () => {
@@ -11,8 +11,13 @@ const CampaignDetails = () => {
     queryFn: () => fetchCampaignDetails(id),
   });
 
-  if (isLoading) return <Spinner />;
-  if (isError) return <Text>Error fetching campaign details: {error.message}</Text>;
+  if (isLoading) return <Spinner size="xl" />;
+  if (isError) return (
+    <Alert status="error">
+      <AlertIcon />
+      Error fetching campaign details: {error.message}
+    </Alert>
+  );
 
   return (
     <Box>
@@ -30,8 +35,18 @@ const CampaignDetails = () => {
           <Text fontWeight="bold">Status:</Text>
           <Text>{campaign.status}</Text>
         </HStack>
-        {/* Add more campaign details as needed */}
+        <HStack>
+          <Text fontWeight="bold">Launch Date:</Text>
+          <Text>{campaign.launch_date ? new Date(campaign.launch_date).toLocaleString() : 'Not launched'}</Text>
+        </HStack>
+        <HStack>
+          <Text fontWeight="bold">Send By Date:</Text>
+          <Text>{campaign.send_by_date ? new Date(campaign.send_by_date).toLocaleString() : 'Not set'}</Text>
+        </HStack>
       </VStack>
+      <Button as={Link} to="/" mt={4} colorScheme="blue">
+        Back to Campaigns
+      </Button>
     </Box>
   );
 };

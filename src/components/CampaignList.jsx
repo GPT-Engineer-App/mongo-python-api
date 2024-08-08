@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Box, Heading, Table, Thead, Tbody, Tr, Th, Td, Text, Spinner, Button } from '@chakra-ui/react';
+import { Box, Heading, Table, Thead, Tbody, Tr, Th, Td, Text, Spinner, Button, Alert, AlertIcon } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 import { fetchCampaigns } from '../services/gophishApi';
 
@@ -10,8 +10,13 @@ const CampaignList = () => {
     queryFn: fetchCampaigns,
   });
 
-  if (isLoading) return <Spinner />;
-  if (isError) return <Text>Error fetching campaigns: {error.message}</Text>;
+  if (isLoading) return <Spinner size="xl" />;
+  if (isError) return (
+    <Alert status="error">
+      <AlertIcon />
+      Error fetching campaigns: {error.message}
+    </Alert>
+  );
 
   return (
     <Box>
@@ -42,7 +47,10 @@ const CampaignList = () => {
           </Tbody>
         </Table>
       ) : (
-        <Text>No campaigns found.</Text>
+        <Alert status="info">
+          <AlertIcon />
+          No campaigns found.
+        </Alert>
       )}
     </Box>
   );
