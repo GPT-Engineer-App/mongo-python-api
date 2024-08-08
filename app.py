@@ -3,6 +3,8 @@ from flask_cors import CORS
 import requests
 from config import Config
 from pymongo import MongoClient
+from bson import json_util
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -45,18 +47,33 @@ def get_campaigns():
     )
     response.raise_for_status()
     campaigns = response.json()
-    return jsonify(campaigns)
+    
+    # Store campaigns in MongoDB
+    for campaign in campaigns:
+        collection.update_one({'id': campaign['id']}, {'$set': campaign}, upsert=True)
+    
+    return json.dumps(campaigns, default=json_util.default)
 
 @app.route('/api/campaigns/<int:id>')
 @handle_errors
 def get_campaign_details(id):
+    # Try to get campaign from MongoDB first
+    campaign = collection.find_one({'id': id})
+    if campaign:
+        return json.dumps(campaign, default=json_util.default)
+    
+    # If not found in MongoDB, fetch from GoPhish API
     response = requests.get(
         f"{GOPHISH_API_URL}/campaigns/{id}",
         headers={'Authorization': GOPHISH_API_KEY}
     )
     response.raise_for_status()
     campaign = response.json()
-    return jsonify(campaign)
+    
+    # Store in MongoDB for future use
+    collection.update_one({'id': campaign['id']}, {'$set': campaign}, upsert=True)
+    
+    return json.dumps(campaign, default=json_util.default)
 
 @app.route('/api/campaigns', methods=['POST'])
 @handle_errors
@@ -68,7 +85,12 @@ def create_campaign():
         json=campaign_data
     )
     response.raise_for_status()
-    return jsonify(response.json()), 201
+    new_campaign = response.json()
+    
+    # Store new campaign in MongoDB
+    collection.insert_one(new_campaign)
+    
+    return json.dumps(new_campaign, default=json_util.default), 201
 
 @app.route('/campaigns')
 def campaigns():
