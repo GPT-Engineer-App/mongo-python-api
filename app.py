@@ -13,6 +13,19 @@ app.config.from_object(Config)
 GOPHISH_API_URL = app.config['GOPHISH_API_URL']
 GOPHISH_API_KEY = app.config['GOPHISH_API_KEY']
 
+# Error handling decorator
+def handle_errors(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except requests.RequestException as e:
+            app.logger.error(f"API request error: {str(e)}")
+            return jsonify({"error": "An error occurred while processing your request"}), 500
+        except Exception as e:
+            app.logger.error(f"Unexpected error: {str(e)}")
+            return jsonify({"error": "An unexpected error occurred"}), 500
+    return wrapper
+
 @app.route('/api/campaigns')
 def get_campaigns():
     try:

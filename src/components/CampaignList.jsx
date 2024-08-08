@@ -8,6 +8,8 @@ const CampaignList = () => {
   const { data: campaigns, isLoading, isError, error } = useQuery({
     queryKey: ['campaigns'],
     queryFn: fetchCampaigns,
+    retry: 3,
+    retryDelay: 1000,
   });
 
   if (isLoading) {

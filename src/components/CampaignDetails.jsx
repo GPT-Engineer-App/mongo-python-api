@@ -9,6 +9,8 @@ const CampaignDetails = () => {
   const { data: campaign, isLoading, isError, error } = useQuery({
     queryKey: ['campaign', id],
     queryFn: () => fetchCampaignDetails(id),
+    retry: 3,
+    retryDelay: 1000,
   });
 
   if (isLoading) return <Spinner size="xl" />;
