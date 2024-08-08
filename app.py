@@ -15,25 +15,26 @@ db = client[MONGO_DB]
 collection = db[MONGO_COLLECTION]
 
 # GoPhish API configuration
-GOPHISH_API_URL = os.getenv('GOPHISH_API_URL', 'http://your-gophish-api-url')
+GOPHISH_API_URL = os.getenv('GOPHISH_API_URL', 'http://localhost:3333')
 GOPHISH_API_KEY = os.getenv('GOPHISH_API_KEY', 'your-api-key')
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/campaigns')
+@app.route('/api/campaigns')
 def campaigns():
     try:
         response = requests.get(
             f"{GOPHISH_API_URL}/api/campaigns/",
             headers={
-                'Authorization': GOPHISH_API_KEY,
+                'Authorization': f'Bearer {GOPHISH_API_KEY}',
                 'Content-Type': 'application/json',
             }
         )
+        response.raise_for_status()
         campaigns = response.json()
-        return render_template('campaigns.html', campaigns=campaigns)
+        return jsonify(campaigns)
     except requests.RequestException as e:
         return jsonify({'error': str(e)}), 500
 
