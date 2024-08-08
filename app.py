@@ -15,8 +15,8 @@ db = client[MONGO_DB]
 collection = db[MONGO_COLLECTION]
 
 # GoPhish API configuration
-GOPHISH_API_URL = os.getenv('GOPHISH_API_URL', 'http://localhost:3333')
-GOPHISH_API_KEY = os.getenv('GOPHISH_API_KEY', 'your-api-key')
+GOPHISH_API_URL = Config.GOPHISH_API_URL
+GOPHISH_API_KEY = Config.GOPHISH_API_KEY
 
 @app.route('/')
 def index():
