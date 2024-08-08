@@ -12,13 +12,10 @@ const api = axios.create({
 
 export const fetchCampaigns = async () => {
   try {
-    console.log('Fetching campaigns...');
     const response = await api.get('/campaigns');
-    console.log('Campaigns fetched successfully:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching campaigns:', error);
-    console.log('Error details:', error.response ? error.response.data : 'No response data');
     throw error;
   }
 };
@@ -29,6 +26,36 @@ export const fetchCampaignDetails = async (id) => {
     return response.data;
   } catch (error) {
     console.error(`Error fetching campaign details for id ${id}:`, error);
+    throw error;
+  }
+};
+
+export const createCampaign = async (campaignData) => {
+  try {
+    const response = await api.post('/campaigns', campaignData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating campaign:', error);
+    throw error;
+  }
+};
+
+export const updateCampaign = async (id, campaignData) => {
+  try {
+    const response = await api.put(`/campaigns/${id}`, campaignData);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating campaign with id ${id}:`, error);
+    throw error;
+  }
+};
+
+export const deleteCampaign = async (id) => {
+  try {
+    const response = await api.delete(`/campaigns/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error deleting campaign with id ${id}:`, error);
     throw error;
   }
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Box, Heading, Table, Thead, Tbody, Tr, Th, Td, Text, Spinner, Button, Alert, AlertIcon, VStack } from '@chakra-ui/react';
+import { Box, Heading, Table, Thead, Tbody, Tr, Th, Td, Text, Spinner, Button, Alert, AlertIcon, Badge } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 import { fetchCampaigns } from '../services/gophishApi';
 
@@ -29,6 +29,15 @@ const CampaignList = () => {
     );
   }
 
+  const getStatusColor = (status) => {
+    switch (status.toLowerCase()) {
+      case 'in progress': return 'yellow';
+      case 'completed': return 'green';
+      case 'scheduled': return 'blue';
+      default: return 'gray';
+    }
+  };
+
   return (
     <Box>
       <Heading as="h2" size="lg" mb={4}>GoPhish Campaigns</Heading>
@@ -48,7 +57,9 @@ const CampaignList = () => {
               <Tr key={campaign.id}>
                 <Td>{campaign.name}</Td>
                 <Td>{new Date(campaign.created_date).toLocaleString()}</Td>
-                <Td>{campaign.status}</Td>
+                <Td>
+                  <Badge colorScheme={getStatusColor(campaign.status)}>{campaign.status}</Badge>
+                </Td>
                 <Td>{campaign.launch_date ? new Date(campaign.launch_date).toLocaleString() : 'Not launched'}</Td>
                 <Td>
                   <Button as={Link} to={`/campaign/${campaign.id}`} colorScheme="blue" size="sm">
@@ -62,7 +73,7 @@ const CampaignList = () => {
       ) : (
         <Alert status="info">
           <AlertIcon />
-          No campaigns found. The API might be empty or not accessible.
+          No campaigns found. Create a new campaign to get started.
         </Alert>
       )}
     </Box>
