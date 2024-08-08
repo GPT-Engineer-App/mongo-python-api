@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API_URL = 'https://safeurl.dk/api'; // Updated GoPhish API URL
-const API_KEY = 'your-api-key'; // Replace with your actual API key
+const API_KEY = '2956b7480392191b9ab24b159548719c305a8ad5ccf16ceb8f1d933d489228b0';
 
 const gophishApi = axios.create({
   baseURL: API_URL,
